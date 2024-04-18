@@ -1,8 +1,17 @@
 import pygame
+import time
 
 class Button(object):
+    """
+    A button, could be short compressed
+    self.status:
+        -1 hide
+        0 disable
+        1 enable
+        2 becompressed 
+    """
     def __init__(self, rect, image_file,image_cx):
-        self.status = 0
+        self.status = 1
         self.rect = pygame.Rect(rect[0],rect[1],rect[2],rect[3])
         self.image_cx = image_cx
 
@@ -38,9 +47,19 @@ class Button(object):
             bflag = self.rect.collidepoint(point)
         return bflag
 
-    def check_click(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            return self.is_over(event.pos)
+    def check_click(self, screen, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
+            self.selected()
+            self.render(screen)
+            pygame.display.update()
+            time.sleep(0.1)
+            self.enabled()
+            self.render(screen)
+            pygame.display.update()
+
+            return 1
+        else:
+            return 0
 
     def hide(self):
         self.status = -1
@@ -50,5 +69,8 @@ class Button(object):
 
     def enabled(self):
         self.status = 1
+
+    def selected(self):
+        self.status = 2
 
     

@@ -30,8 +30,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if(t.check_click(event)):
-                running = False
+            if(t.check_click(screen,event)):
+                running = 1
         pass
     pass
 
