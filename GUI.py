@@ -1,6 +1,8 @@
 import pygame
 import time
 
+LEFTTOP = 0
+CENTER = 1
 class Button(object):
     """
     A button, could be short compressed
@@ -10,7 +12,7 @@ class Button(object):
         1 enable
         2 becompressed 
     """
-    def __init__(self, pos, image_file,image_cx):
+    def __init__(self, pos, image_file,image_cx,option=LEFTTOP):
         self.status = 1
         self.image_cx = image_cx
 
@@ -33,7 +35,17 @@ class Button(object):
 
             self.image_heigh = image_rect.height
             self.image_width = width
-        self.rect = pygame.Rect(pos[0],pos[1],self.image_width,self.image_heigh)
+        if(option==CENTER):
+            self.rect = pygame.Rect(pos[0]-int(self.image_width/2),\
+                                    pos[1]-int(self.image_heigh/2),\
+                                    self.image_width,\
+                                    self.image_heigh)
+        else:
+            self.rect = pygame.Rect(pos[0],\
+                                    pos[1],\
+                                    self.image_width,\
+                                    self.image_heigh)
+
 
     def render(self, surface):
         #print(self.image_set)

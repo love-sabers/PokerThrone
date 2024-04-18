@@ -1,10 +1,10 @@
 import pygame
 import sys
+import Meau
+from Meau import MainMeau
 from Const import GameEvent
 from Const import Config
-from Game import Game
-from GUI import Button
-from GUI import Rod
+
 def main():
     #init pygame
     pygame.init()
@@ -13,25 +13,19 @@ def main():
     running=True
 
     #meau circulate
-    t=Rod((50,100),'source/start.drawio.png',3)
-
+    
+    meau=MainMeau()
     while(running):
         screen.fill((0,0,0))
-        t.render(screen)
-        pygame.display.update()
-        #select mode
+        choice=meau.run(screen)
 
-        #mode run
-        
-
-        clock.tick(60)
-        #quit game
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if(t.check_click(screen,event)):
-                running = 1
-        pass
+        if(choice==Meau.PLAY):
+            pass
+        elif(choice==Meau.OPTION):
+            pass
+        elif(choice==Meau.QUIT):
+            running=False
+            
     pass
 
     #quit pygame
