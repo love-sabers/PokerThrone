@@ -1,9 +1,10 @@
 import pygame
 import sys
+import Meau
+from Meau import MainMeau
 from Const import GameEvent
 from Const import Config
-from Game import Game
-from GUI import Button
+
 def main():
     #init pygame
     pygame.init()
@@ -12,27 +13,19 @@ def main():
     running=True
 
     #meau circulate
-    t=Button((0,0,380,260),'source/start.drawio.png',3)
-    # image = pygame.image.load('source/start.drawio.png')
-    # rect=image.get_rect()
-    # screen.blit(image,rect)
-    # t.render(screen)
+    
+    meau=MainMeau()
     while(running):
-        t.render(screen)
-        pygame.display.update()
-        #select mode
+        screen.fill((0,0,0))
+        choice=meau.run(screen)
 
-        #mode run
-        
-
-        clock.tick(60)
-        #quit game
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if(t.check_click(event)):
-                running = False
-        pass
+        if(choice==Meau.PLAY):
+            pass
+        elif(choice==Meau.OPTION):
+            pass
+        elif(choice==Meau.QUIT):
+            running=False
+            
     pass
 
     #quit pygame

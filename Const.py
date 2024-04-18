@@ -1,5 +1,6 @@
 class Config(object):
     WINDOW_SIZE=(1080,720)
+    FPS=30
     pass
 
 class GameEvent(object):
