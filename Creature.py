@@ -1,7 +1,11 @@
 from Const import GameEvent
-class creature(object):
+
+class Skill(object):
+    pass
+
+class Creature(object):
     """
-    The base class of all creature
+    The base class of all Creature
     including hero and monster
     """
 
@@ -13,55 +17,38 @@ class creature(object):
     base_MP_max=50
 
     def __init__(self):
-        self.HP=creature.base_HP
-        self.MP=creature.base_MP
+        self.HP=Creature.base_HP
+        self.MP=Creature.base_MP
         return
     
     def add_HP(self,value):
-        if(self.HP+value>creature.base_HP_max):
-            self.HP=creature.base_HP_max
+        if(self.HP+value>Creature.base_HP_max):
+            self.HP=Creature.base_HP_max
             return GameEvent.ADD_HP_OVER
         else:
             self.HP+=value
             return 0
         
     def lose_HP(self,value):
-        if(self.HP-value<creature.base_HP_min):
-            self.HP=creature.base_HP_min
+        if(self.HP-value<Creature.base_HP_min):
+            self.HP=Creature.base_HP_min
             return GameEvent.LOSE_HP_OVER
         else:
             self.HP-=value
             return 0 
     
     def add_MP(self,value):
-        if(self.MP+value>creature.base_MP_max):
-            self.MP=creature.base_MP_max
+        if(self.MP+value>Creature.base_MP_max):
+            self.MP=Creature.base_MP_max
             return GameEvent.ADD_MP_OVER
         else:
             self.MP+=value
             return 0
         
     def lose_MP(self,value):
-        if(self.MP-value<creature.base_MP_min):
-            self.MP=creature.base_MP_min
+        if(self.MP-value<Creature.base_MP_min):
+            self.MP=Creature.base_MP_min
             return GameEvent.LOSE_MP_OVER
         else:
             self.MP-=value
             return 0 
-        
-class card(object):
-    card_num=3
-    def __init__(self):
-        self.cardid=0
-        pass
-    def run(self):
-        pass
-
-class carddeck(object):
-    pass
-
-class poker(object):
-    pass
-
-class pokerdeck(object):
-    pass

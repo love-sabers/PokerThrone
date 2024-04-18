@@ -3,17 +3,10 @@ import time
 
 LEFTTOP = 0
 CENTER = 1
-class Button(object):
-    """
-    A button, could be short compressed
-    self.status:
-        -1 hide
-        0 disable
-        1 enable
-        2 becompressed 
-    """
-    def __init__(self, pos, image_file,image_cx,option=LEFTTOP):
-        self.status = 1
+
+class ImageSet(object):
+    def __init__(self,pos,image_file,image_cx,option=LEFTTOP):
+        self.status = 0
         self.image_cx = image_cx
 
         # 设定底图，每一种 status 一张。
@@ -35,6 +28,13 @@ class Button(object):
 
             self.image_heigh = image_rect.height
             self.image_width = width
+            self.change_pos(pos,option)
+    def render(self, surface):
+        if self.status >= 0:
+            if self.image is not None:
+                if self.status < self.image_cx:
+                    surface.blit(self.image_set[self.status], (self.rect.left, self.rect.top))
+    def change_pos(self,pos,option):
         if(option==CENTER):
             self.rect = pygame.Rect(pos[0]-int(self.image_width/2),\
                                     pos[1]-int(self.image_heigh/2),\
@@ -45,14 +45,21 @@ class Button(object):
                                     pos[1],\
                                     self.image_width,\
                                     self.image_heigh)
+    def change_status(self,value):
+        self.status=value
 
-
-    def render(self, surface):
-        #print(self.image_set)
-        if self.status >= 0:
-            if self.image is not None:
-                if self.status < self.image_cx:
-                    surface.blit(self.image_set[self.status], (self.rect.left, self.rect.top))
+class Button(ImageSet):
+    """
+    A button, could be short compressed
+    self.status:
+        -1 hide
+        0 disable
+        1 enable
+        2 becompressed 
+    """
+    def __init__(self, pos, image_file,image_cx,option=LEFTTOP):
+        super().__init__(pos, image_file, image_cx,option)
+        self.status = 1
 
     def is_over(self, point):
         if self.status <= 0:
@@ -70,7 +77,6 @@ class Button(object):
             self.enabled()
             self.render(screen)
             pygame.display.update()
-
             return 1
         else:
             return 0
@@ -98,8 +104,8 @@ class Rod(Button):
     """
 
     UPPER_PIX=50#the distance that move up when be selected
-    def __init__(self, rect, image_file, image_cx):
-        super().__init__(rect, image_file, image_cx)
+    def __init__(self, pos, image_file, image_cx,option=LEFTTOP):
+        super().__init__(pos, image_file, image_cx,option)
     def render(self, surface):
         #print(self.image_set)
         if self.status >= 0:
