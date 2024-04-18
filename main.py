@@ -4,6 +4,7 @@ from Const import GameEvent
 from Const import Config
 from Game import Game
 from GUI import Button
+from GUI import Rod
 def main():
     #init pygame
     pygame.init()
@@ -12,12 +13,10 @@ def main():
     running=True
 
     #meau circulate
-    t=Button((0,0,380,260),'source/start.drawio.png',3)
-    # image = pygame.image.load('source/start.drawio.png')
-    # rect=image.get_rect()
-    # screen.blit(image,rect)
-    # t.render(screen)
+    t=Rod((50,100),'source/start.drawio.png',3)
+
     while(running):
+        screen.fill((0,0,0))
         t.render(screen)
         pygame.display.update()
         #select mode
