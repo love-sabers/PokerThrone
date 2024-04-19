@@ -1,9 +1,11 @@
 import pygame
 import sys
-import Meau
-from Meau import MainMeau
+import MeauClass
+from MeauClass import MainMeau
 from Const import GameEvent
 from Const import Config
+from PokerClass import Poker
+from GUI import Rod
 
 def main():
     #init pygame
@@ -14,16 +16,26 @@ def main():
 
     #meau circulate
     
+    # r=rob()
+    # p=Poker('Ace','Clubs')
+
+    # while(running):
+    #     screen.fill((0,0,0))
+    #     p.render(screen)
+    #     pygame.display.update()
+    #     for event in pygame.event.get():
+    #         p.ui.check_click(screen,event)
+    #         if event.type == pygame.QUIT:
+    #             running=0
     meau=MainMeau()
     while(running):
-        screen.fill((0,0,0))
         choice=meau.run(screen)
 
-        if(choice==Meau.PLAY):
+        if(choice==MeauClass.PLAY):
             pass
-        elif(choice==Meau.OPTION):
+        elif(choice==MeauClass.OPTION):
             pass
-        elif(choice==Meau.QUIT):
+        elif(choice==MeauClass.QUIT):
             running=False
             
     pass
