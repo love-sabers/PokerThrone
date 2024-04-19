@@ -115,6 +115,7 @@ class Hero(Creature):
     def __init__(self):
         super().__init__()
         self.skill_set = {'Medicine': Medicine(self), 'Reshuffle': Reshuffle(self), 'Shield': Shield(self)}
+
         self.state = []
         self.action = []
 
