@@ -125,19 +125,24 @@ HIGH_POKER=10
 不符合以上任何一种牌型的情况。
 '''
 class PokerDeck:
-    suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
-    ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+    GAP=200
+    POKER_BACK_PATH='source/pokerback.drawio.png'
+    SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+    RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
-    def __init__(self):
-        self.unrevealed = [Poker(rank, suit) for suit in self.suits for rank in self.ranks]
-        random.shuffle(self.Pokers)
+    def __init__(self,pos:tuple[int,int]):
+        self.pos=pos
+        self.img_disPokered = GUI.ImageSet((0,100),PokerDeck.POKER_BACK_PATH,1)
+        self.img_unrevealed = GUI.ImageSet((800,100),PokerDeck.POKER_BACK_PATH,1)
+        self.unrevealed = [Poker(rank, suit) for suit in self.SUITS for rank in self.RANKS]
+        random.shuffle(self.unrevealed)
         self.revealed = []
         self.revealed_tmp= []
         self.disPokered = []
 
     def reset_deck(self):
         """ Resets the entire deck, shuffles the Pokers, and clears all piles. """
-        self.unrevealed+=self.revealed
+        self.unrevealed+=self.revealed+self.disPokered
         random.shuffle(self.unrevealed)
         self.disPokered = []
         self.revealed = []
@@ -155,6 +160,7 @@ class PokerDeck:
         
         # Move up to 5 Pokers to revealed, if less than 5 remain, move all
         self.revealed = [self.unrevealed.pop(0) for _ in range(5)]
+        self.set_pos(self.pos)
 
     def evaluate_hand(self):
         if len(self.revealed) < 5:
@@ -188,8 +194,18 @@ class PokerDeck:
         return HIGH_POKER  # High Poker
 
     def render(self,surface:pygame.Surface)->None:
+        if len(self.disPokered) :
+            self.img_disPokered.render(surface)
+        if len(self.unrevealed) :
+            self.img_unrevealed.render(surface)
         for poker in self.revealed :
             poker.render(surface)
+
+    def set_pos(self,pos:tuple[int,int]):
+        i=-2
+        for poker in self.revealed:
+            poker.set_pos((pos[0]+i*PokerDeck.GAP,pos[1]))
+            i+=1
 
     def reload_user(self):
         # 统计选中的牌的个数
@@ -208,6 +224,7 @@ class PokerDeck:
             random.shuffle(self.unrevealed)  # Shuffle for randomness
             new_Pokers = [self.unrevealed.pop(0) for _ in range(selected_num)]
             self.revealed.extend(new_Pokers)
+            self.set_pos(self.pos)
 
     def show_revealed(self):
         return self.revealed

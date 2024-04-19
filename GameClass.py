@@ -1,10 +1,23 @@
 import pygame
+import sys
+from PokerClass import PokerDeck
 class Game(object):
-    def __init__(self):
+    def __init__(self,screen:pygame.Surface):
+        self.screen=screen
+        self.p=PokerDeck((540,360))
         pass
     def game_init(self):
+        self.p.update_revealed()
         pass
     def game_run(self):
+        self.screen.fill((0,0,0))
+        self.p.render(self.screen)
+        pygame.display.update()
+        pygame.time.Clock().tick(60)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
         pass
     def game_quit(self):
         pass
@@ -12,7 +25,7 @@ class Game(object):
         pass
     def game_load(self):
         pass
-    def game(self,screen:pygame.Surface):
+    def game(self):
         #游戏初始化
         self.game_init()
         self.game_load()
