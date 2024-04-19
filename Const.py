@@ -15,5 +15,6 @@ class GameEvent(object):
     HEAL=7
     RAGE=8
     SHOCK=9
-    ATTACK=10
-    DEFENSE=11
+    RESHUFFLE=10
+    ATTACK=11
+    DEFENSE=12

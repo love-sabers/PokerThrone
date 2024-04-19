@@ -100,10 +100,21 @@ class Shockwave(Skill):
             return GameEvent.SKILL_RELEASE_FAIL
         return GameEvent.ATTACK, GameEvent.SHOCK
 
+class Reshuffle(Skill):
+    def __init__(self, entity):
+        self.MP_cost = 1
+        self.entity = entity
+
+    @property
+    def activate(self):
+        if self.MP_cost > self.entity.MP:
+            return GameEvent.SKILL_RELEASE_FAIL
+        return Reshuffle
+
 class Hero(Creature):
     def __init__(self):
         super().__init__()
-        self.skill_set = {'Medicine': Medicine(self), 'Rage': Rage(self), 'Shield': Shield(self)}
+        self.skill_set = {'Medicine': Medicine(self), 'Reshuffle': Reshuffle(self), 'Shield': Shield(self)}
         self.state = []
         self.action = []
 
