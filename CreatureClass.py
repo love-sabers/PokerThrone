@@ -54,63 +54,76 @@ class Creature(object):
             self.MP-=value
             return 0
 
-    def create_skill_set(self):
-        return self.SkillSet(self)
 
-    class SkillSet(object):
-        def __init__(self, outer):
-            self.outer = outer
-            self.able_to_act = True
+class Shield(Skill):
+    def __init__(self, entity):
+        self.MP_cost = 3
+        self.entity = entity
 
-        def heal(self):
-            if self.outer.HP < 10:
-                self.outer.add_HP(20)
-            else:
-                self.outer.add_HP(10)
+    @property
+    def activate(self):
+        if self.MP_cost > self.entity.MP:       # 技能释放失败
+            return GameEvent.SKILL_RELEASE_FAIL
+        return GameEvent.IMMUNE
 
-        def silence(self):
-            self.able_to_act = False
 
-        def reset(self):
-            self.able_to_act = True
+class Medicine(Skill):
+    def __init__(self, entity):
+        self.MP_cost = 2
+        self.entity = entity
 
-        def change_carddeck(self):
-            pass
+    @property
+    def activate(self):
+        if self.MP_cost > self.entity.MP:  # 技能释放失败
+            return GameEvent.SKILL_RELEASE_FAIL
+        return GameEvent.HEAL
 
-        def attack(self, damage=10):
-            return damage
+class Rage(Skill):
+    def __init__(self, entity):
+        self.MP_cost = 3
+        self.entity = entity
 
-        def defense(self, damage=10):
-            self.outer.lose_HP(damage)
+    @property
+    def activate(self):
+        if self.MP_cost > self.entity.MP:  # 技能释放失败
+            return GameEvent.SKILL_RELEASE_FAIL
+        return GameEvent.RAGE
 
+class Shockwave(Skill):
+    def __init__(self, entity):
+        self.MP_cost = 4
+        self.entity = entity
+
+    @property
+    def activate(self):
+        if self.MP_cost > self.entity.MP:   # 技能释放失败
+            return GameEvent.SKILL_RELEASE_FAIL
+        return GameEvent.ATTACK, GameEvent.SHOCK
 
 class Hero(Creature):
     def __init__(self):
         super().__init__()
-        self.skill_set = self.create_skill_set()
-        self.shock_wave = self.skill_set.silence
-        self.change_carddeck = self.skill_set.change_carddeck
+        self.skill_set = {'Medicine': Medicine(self), 'Rage': Rage(self), 'Shield': Shield(self)}
+        self.state = []
+        self.action = []
 
-    def attack(self):   # 被动属性
-        if self.HP < 10:
-            return self.skill_set.attack(20)
-        else:
-            return self.skill_set.attack()
-
-    def defence(self):  # 被动属性
-        c = random.randint(1, 10)
-        if c < 3:
-            self.skill_set.defense(5)
-        else:
-            self.skill_set.defense()
+    def update(self, **kwargs):
+        self.state = kwargs['state']
+        self.action = kwargs['action']
 
 
 class Monster(Creature):
     def __init__(self):
         super().__init__()
-        self.skill_set = self.create_skill_set()
-        self.shock_wave = self.skill_set.silence
-        self.attack = self.skill_set.attack
-        self.defence = self.skill_set.defense
-        self.change_carddeck = self.skill_set.change_carddeck
+        self.skill_set = {}
+        self.state = []
+        self.action = []
 
+    def update(self, **kwargs):
+        self.state = kwargs['state']
+        self.action = kwargs['action']
+
+
+# test
+h = Hero()
+print(h.skill_set['Medicine'].activate)
