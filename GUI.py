@@ -1,19 +1,23 @@
 import pygame
 import time
+import os
+from typing import Dict, Tuple, Sequence,List
+#Type
 
 LEFTTOP = 0
 CENTER = 1
-class Button(object):
-    """
-    A button, could be short compressed
-    self.status:
-        -1 hide
-        0 disable
-        1 enable
-        2 becompressed 
-    """
-    def __init__(self, pos, image_file,image_cx,option=LEFTTOP):
-        self.status = 1
+PATH_IN = 2 # 从路径读取图片
+FILE_IN = 3 # 从变量获取图片
+LIST_IN = 4
+
+class ImageSet(object):
+    def __init__(self,
+                pos:Tuple[int,int],
+                image_file:str|pygame.Surface|List[pygame.Surface],
+                image_cx:int,
+                option=LEFTTOP,
+                mode=PATH_IN) -> None:
+        self.status = 0
         self.image_cx = image_cx
 
         # 设定底图，每一种 status 一张。
@@ -22,37 +26,87 @@ class Button(object):
             self.image_width = 0
             self.image_heigh = 0
         else:
-            self.image = pygame.image.load(image_file)
-            self.image_set = []
 
-            image_rect = self.image.get_rect()
-            width = int(image_rect.width / image_cx)
+            #按照规则读取文件
+            
+            if mode == PATH_IN:
+                if type(image_file)==str :
+                    if os.path.exists(image_file) :
+                        self.image = pygame.image.load(image_file)
+                    else:
+                        raise Exception('No such file: '+image_file)
+                else:
+                    raise Exception("image_file is not a image path")
+            elif mode == FILE_IN :
+                if isinstance(image_file, pygame.Surface) :
+                    self.image=image_file
+                else:
+                    raise Exception("image_file is not a surface")
+            elif mode == LIST_IN :
+                if isinstance(image_file, list) and all(isinstance(item, pygame.Surface) for item in image_file):
+                    if(len(image_file)!=0):
+                        self.image=1
+                        self.image_set=image_file
+                    else:
+                        raise Exception("image_file is empty")
+                else:
+                    raise Exception("image_file is not a surface list")
+            else:
+                raise Exception('No such mode')
 
-            x = 0
-            for i in range(self.image_cx):
-                self.image_set.append(self.image.subsurface((x, 0), (width, image_rect.height)))
-                x += width
+            if mode == LIST_IN :
+                self.image_heigh = self.image_set[0].get_rect().height
+                self.image_width = self.image_set[0].get_rect().width
+            else :
+                self.image_set = []
+                image_rect = self.image.get_rect()
+                width = int(image_rect.width / image_cx)
+                x = 0
+                for i in range(self.image_cx):
+                    self.image_set.append(self.image.subsurface((x, 0), (width, image_rect.height)))
+                    x += width
+                self.image_heigh = image_rect.height
+                self.image_width = width
 
-            self.image_heigh = image_rect.height
-            self.image_width = width
-        if(option==CENTER):
-            self.rect = pygame.Rect(pos[0]-int(self.image_width/2),\
-                                    pos[1]-int(self.image_heigh/2),\
-                                    self.image_width,\
-                                    self.image_heigh)
-        else:
-            self.rect = pygame.Rect(pos[0],\
-                                    pos[1],\
-                                    self.image_width,\
-                                    self.image_heigh)
-
-
-    def render(self, surface):
-        #print(self.image_set)
+            self.set_pos(pos,option)
+    def render(self, surface:pygame.Surface):
         if self.status >= 0:
             if self.image is not None:
                 if self.status < self.image_cx:
                     surface.blit(self.image_set[self.status], (self.rect.left, self.rect.top))
+    def set_pos(self,pos:Tuple[int,int],option=LEFTTOP):
+        if option == LEFTTOP :
+            self.rect = pygame.Rect(pos[0],\
+                                    pos[1],\
+                                    self.image_width,\
+                                    self.image_heigh)
+        elif option==CENTER :
+            self.rect = pygame.Rect(pos[0]-int(self.image_width/2),\
+                                    pos[1]-int(self.image_heigh/2),\
+                                    self.image_width,\
+                                    self.image_heigh)
+        else :
+            raise Exception("No such option")
+    def change_status(self,value:int):
+        self.status=value
+
+class Button(ImageSet):
+    """
+    A button, could be short compressed
+    self.status:
+        -1 hide
+        0 disable
+        1 enable
+        2 becompressed 
+    """
+    def __init__(self, 
+                pos: Tuple[int],
+                image_file: str | pygame.Surface | List[pygame.Surface], 
+                image_cx: int, 
+                option=LEFTTOP, 
+                mode=PATH_IN) -> None:
+        super().__init__(pos, image_file, image_cx, option, mode)
+        self.status=1
 
     def is_over(self, point):
         if self.status <= 0:
@@ -61,7 +115,7 @@ class Button(object):
             bflag = self.rect.collidepoint(point)
         return bflag
 
-    def check_click(self, screen, event):
+    def check_click(self, screen:pygame.Surface, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
             self.selected()
             self.render(screen)
@@ -70,7 +124,6 @@ class Button(object):
             self.enabled()
             self.render(screen)
             pygame.display.update()
-
             return 1
         else:
             return 0
@@ -98,17 +151,21 @@ class Rod(Button):
     """
 
     UPPER_PIX=50#the distance that move up when be selected
-    def __init__(self, rect, image_file, image_cx):
-        super().__init__(rect, image_file, image_cx)
-    def render(self, surface):
+    def __init__(self, 
+                pos: Tuple[int],
+                image_file: str | pygame.Surface | List[pygame.Surface], 
+                image_cx: int, 
+                option=LEFTTOP, 
+                mode=PATH_IN) -> None:
+        super().__init__(pos, image_file, image_cx, option, mode)
+    def render(self, surface:pygame.Surface):
         #print(self.image_set)
         if self.status >= 0:
             if self.image is not None:
-                if self.status < self.image_cx:
-                    if(self.status==2):#be selected so move up
-                        surface.blit(self.image_set[self.status-1], (self.rect.left, self.rect.top-Rod.UPPER_PIX))
-                    else:
-                        surface.blit(self.image_set[self.status], (self.rect.left, self.rect.top))
+                if(self.status==2):#be selected so move up
+                    surface.blit(self.image_set[self.status-1], (self.rect.left, self.rect.top-Rod.UPPER_PIX))
+                else:
+                    surface.blit(self.image_set[self.status], (self.rect.left, self.rect.top))
     def is_over(self, point):
         if self.status <= 0:
             bflag = False      # disabled
@@ -119,11 +176,11 @@ class Rod(Button):
             else:
                 bflag = self.rect.collidepoint(point)
         return bflag
-    def check_click(self, screen, event):
+    def check_click(self, screen:pygame.Surface, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
             self.status=3-self.status
-            self.render(screen)
-            pygame.display.update()
+            # self.render(screen)
+            # pygame.display.update()
             return 1
         else:
             return 0
