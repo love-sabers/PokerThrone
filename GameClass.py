@@ -8,6 +8,7 @@ class Game(object):
         pass
     def game_init(self):
         self.p.update_revealed()
+        self.p.update_revealed()
         pass
     def game_run(self):
         self.screen.fill((0,0,0))
@@ -15,6 +16,7 @@ class Game(object):
         pygame.display.update()
         pygame.time.Clock().tick(60)
         for event in pygame.event.get():
+            self.p.check_click(self.screen,event)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()

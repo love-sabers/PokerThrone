@@ -159,7 +159,6 @@ class Rod(Button):
                 mode=PATH_IN) -> None:
         super().__init__(pos, image_file, image_cx, option, mode)
     def render(self, surface:pygame.Surface):
-        #print(self.image_set)
         if self.status >= 0:
             if self.image is not None:
                 if(self.status==2):#be selected so move up
@@ -179,8 +178,6 @@ class Rod(Button):
     def check_click(self, screen:pygame.Surface, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
             self.status=3-self.status
-            # self.render(screen)
-            # pygame.display.update()
             return 1
         else:
             return 0
