@@ -13,32 +13,44 @@ from GUI import Rod
         __init__(self, rank, suit): 构造方法,初始化一张牌的等级和花色。
         __repr__(self): 特殊方法,用于定义对象的“官方”字符串表示,这里返回例如"Ace of Spades"这样的字符串,方便打印和查看。
 '''
+
+OPTION_SINGLE_IN = 1
+OPTION_GROUP_IN = 2
+
 class Poker:
     '''
     rank: 表示牌的等级(2, 3, ..., 10, Jack, Queen, King, Ace)
     suit: 表示牌的花色(Hearts, Diamonds, Clubs, Spades)
     '''
+
     POKER_DISABLE_PATH='source/Poker0.drawio.png'
     POKER_ENABLE_PATH='source/Poker1.drawio.png'
     SUIT_ORDER={'Diamonds':0,'Hearts':1,'Spades':2,'Clubs':3}
     RANK_ORDER={'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6,
                 '9': 7, '10': 8, 'Jack': 9, 'Queen': 10, 'King': 11, 'Ace': 12}
-    def __init__(self, rank:str, suit:str)->None:
+    def __init__(self, rank:str, suit:str,source=None,option=OPTION_SINGLE_IN)->None:
         self.rank = rank
         self.suit = suit
         self.rank_value = self.get_rank_value(rank)
-        img_disable=pygame.image.load(Poker.POKER_DISABLE_PATH)
-        img_enable=pygame.image.load(Poker.POKER_ENABLE_PATH)
-        if img_disable.get_rect().size==img_enable.get_rect().size :
-            width=int(img_disable.get_rect().width/13)
-            heigh=int(img_disable.get_rect().height/4)
-            px=Poker.RANK_ORDER[self.rank]*width
-            py=Poker.SUIT_ORDER[self.suit]*heigh
-            image_set=[img_disable.subsurface((px,py),(width,heigh)),
-                       img_enable.subsurface((px,py),(width,heigh))]
-            self.ui=Rod((50,50),image_set,2,mode=GUI.LIST_IN)
-        else :
-            raise Exception("DisableImage and EnableImage are not same size")
+
+        if option==OPTION_SINGLE_IN :
+            img_disable=pygame.image.load(Poker.POKER_DISABLE_PATH)
+            img_enable=pygame.image.load(Poker.POKER_ENABLE_PATH)
+            if img_disable.get_rect().size==img_enable.get_rect().size :
+                width=int(img_disable.get_rect().width/13)
+                heigh=int(img_disable.get_rect().height/4)
+                px=Poker.RANK_ORDER[self.rank]*width
+                py=Poker.SUIT_ORDER[self.suit]*heigh
+                image_set=[img_disable.subsurface((px,py),(width,heigh)),
+                        img_enable.subsurface((px,py),(width,heigh))]
+                self.ui=Rod((50,50),image_set,2,mode=GUI.LIST_IN)
+            else :
+                raise Exception("Poker DisableImage and EnableImage are not same size")
+        elif option==OPTION_GROUP_IN :
+            self.ui=Rod((50,50),source,2,mode=GUI.LIST_IN)
+        else:
+            raise Exception("No such pokerinit option")
+
 
     def __repr__(self):
         return f"{self.rank} of {self.suit}"
@@ -51,6 +63,9 @@ class Poker:
     
     def render(self,surface:pygame.Surface)->None:
         self.ui.render(surface)
+
+    def check_click(self,event):
+        self.ui.check_click(event)
 
     def is_selected(self)->bool:
         return self.ui.is_selected()
@@ -125,19 +140,42 @@ HIGH_POKER=10
 不符合以上任何一种牌型的情况。
 '''
 class PokerDeck:
-    suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
-    ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+    GAP=120
+    POKER_BACK_PATH='source/pokerback.drawio.png'
+    SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+    RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
-    def __init__(self):
-        self.unrevealed = [Poker(rank, suit) for suit in self.suits for rank in self.ranks]
-        random.shuffle(self.Pokers)
+    def __init__(self,pos:tuple[int,int]):
+        self.pos=pos
+        self.img_disPokered = GUI.ImageSet((0,360),PokerDeck.POKER_BACK_PATH,1,option=GUI.LEFTCENTER)
+        self.img_unrevealed = GUI.ImageSet((1080,360),PokerDeck.POKER_BACK_PATH,1,option=GUI.RIGHTCENTER)
+
+
+        img_disable=pygame.image.load(Poker.POKER_DISABLE_PATH)
+        img_enable=pygame.image.load(Poker.POKER_ENABLE_PATH)
+        if img_disable.get_rect().size==img_enable.get_rect().size :
+            width=int(img_disable.get_rect().width/13)
+            heigh=int(img_disable.get_rect().height/4)
+        else:    
+            raise Exception("Poker DisableImage and EnableImage are not same size")
+
+        self.unrevealed=[]
+        for suit in self.SUITS:
+            for rank in self.RANKS:
+                px=Poker.RANK_ORDER[rank]*width
+                py=Poker.SUIT_ORDER[suit]*heigh
+                image_set=[ img_disable.subsurface((px,py),(width,heigh)),
+                            img_enable.subsurface((px,py),(width,heigh))]
+                self.unrevealed.insert(0,Poker(rank, suit, source=image_set, option=OPTION_GROUP_IN))
+                
+        random.shuffle(self.unrevealed)
         self.revealed = []
         self.revealed_tmp= []
         self.disPokered = []
 
     def reset_deck(self):
         """ Resets the entire deck, shuffles the Pokers, and clears all piles. """
-        self.unrevealed+=self.revealed
+        self.unrevealed+=self.revealed+self.disPokered
         random.shuffle(self.unrevealed)
         self.disPokered = []
         self.revealed = []
@@ -155,6 +193,7 @@ class PokerDeck:
         
         # Move up to 5 Pokers to revealed, if less than 5 remain, move all
         self.revealed = [self.unrevealed.pop(0) for _ in range(5)]
+        self.set_pos(self.pos)
 
     def evaluate_hand(self):
         if len(self.revealed) < 5:
@@ -188,8 +227,24 @@ class PokerDeck:
         return HIGH_POKER  # High Poker
 
     def render(self,surface:pygame.Surface)->None:
+        if len(self.disPokered) :
+            self.img_disPokered.render(surface)
+        if len(self.unrevealed) :
+            self.img_unrevealed.render(surface)
         for poker in self.revealed :
             poker.render(surface)
+
+    def check_click(self,event):
+        for poker in self.revealed :
+            poker.check_click(event)
+        
+
+    def set_pos(self,pos:tuple[int,int]):
+        i=-2
+        for poker in self.revealed:
+            poker.ui.enabled()
+            poker.set_pos((pos[0]+i*PokerDeck.GAP,pos[1]),option=GUI.CENTER)
+            i+=1
 
     def reload_user(self):
         # 统计选中的牌的个数
@@ -197,17 +252,20 @@ class PokerDeck:
         for poker in self.revealed:
             if poker.is_selected() :
                 selected_num+=1
-
         if len(self.unrevealed) >= selected_num:
             # Move specified Pokers to disPokered pile
+            new_pokers=[]
             for poker in self.revealed :
                 if poker.is_selected() :
-                    self.revealed.remove(poker)
                     self.disPokered.append(poker)
+                else:
+                    new_pokers.append(poker)
+                    
             # Replace with random Pokers from the unrevealed pile
             random.shuffle(self.unrevealed)  # Shuffle for randomness
-            new_Pokers = [self.unrevealed.pop(0) for _ in range(selected_num)]
-            self.revealed.extend(new_Pokers)
+            new_pokers+= [self.unrevealed.pop(0) for _ in range(selected_num)]
+            self.revealed=new_pokers
+            self.set_pos(self.pos)
 
     def show_revealed(self):
         return self.revealed
