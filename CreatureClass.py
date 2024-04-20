@@ -1,8 +1,18 @@
 from Const import GameEvent
 import random
 
+
 class Skill(object):
-    pass
+    def __init__(self):
+        self.result = {'state': GameEvent.SKILL_RELEASE,
+                       'MP_cost': GameEvent.NULL,
+                       'HP_cost': GameEvent.NULL,
+                       'HP_increase': GameEvent.NULL,
+                       'pos_effect': GameEvent.NULL,        # 正面效果是带给自己的正面效果
+                       'neg_effect': GameEvent.NULL,        # 负面效果是带给别人的负面效果
+                       'damage': GameEvent.NULL,
+                       'operate': GameEvent.NULL}           # 对游戏其他部分的操作请求，如换牌
+
 
 class Creature(object):
     """
@@ -55,87 +65,191 @@ class Creature(object):
             return 0
 
 
-class Shield(Skill):
+class Shield(Skill):        # 普通技能
     def __init__(self, entity):
-        self.MP_cost = 3
+        super().__init__()
+        self.result['MP_cost'] = 3
         self.entity = entity
 
     @property
     def activate(self):
-        if self.MP_cost > self.entity.MP:       # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.IMMUNE
+        if self.result['MP_cost'] > self.entity.MP:       # 技能释放失败
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            self.result['pos_effect'] = GameEvent.IMMUNE
+            return self.result
 
 
-class Medicine(Skill):
+class Medicine(Skill):          # 普通技能
     def __init__(self, entity):
-        self.MP_cost = 2
+        super().__init__()
+        self.result['MP_cost'] = 2
         self.entity = entity
 
     @property
     def activate(self):
-        if self.MP_cost > self.entity.MP:  # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.HEAL
+        if self.result['MP_cost'] > self.entity.MP:  # 技能释放失败
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            self.result['HP_increase'] = 5
+            return self.result
 
-class Rage(Skill):
+
+class Reshuffle(Skill):         # 普通技能
     def __init__(self, entity):
-        self.MP_cost = 3
+        super().__init__()
+        self.result['MP_cost'] = 1
         self.entity = entity
 
     @property
     def activate(self):
-        if self.MP_cost > self.entity.MP:  # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.RAGE
+        if self.result['MP_cost'] > self.entity.MP:
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            self.result['operate'] = GameEvent.RESHUFFLE
+            return self.result
 
-class Shockwave(Skill):
+
+class Attack(Skill):
     def __init__(self, entity):
-        self.MP_cost = 4
+        super().__init__()
+        self.result['damage'] = 10
+
+    @property
+    def activate(self):
+        return self.result
+
+
+class Rage(Skill):              # 较强技能
+    def __init__(self, entity):
+        super().__init__()
+        self.result['MP_cost'] = 3
         self.entity = entity
 
     @property
     def activate(self):
-        if self.MP_cost > self.entity.MP:   # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.ATTACK, GameEvent.SHOCK
+        if self.result['MP_cost'] > self.entity.MP:  # 技能释放失败
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            self.result['HP_cost'] = 5
+            self.result['pos_effect'] = GameEvent.RAGE
+            return self.result
 
-class Reshuffle(Skill):
+
+class Shockwave(Skill):         # 较强技能
     def __init__(self, entity):
-        self.MP_cost = 1
+        super().__init__()
+        self.result['MP_cost'] = 4
         self.entity = entity
 
     @property
     def activate(self):
-        if self.MP_cost > self.entity.MP:
-            return GameEvent.SKILL_RELEASE_FAIL
-        return Reshuffle
+        if self.result['MP_cost'] > self.entity.MP:   # 技能释放失败
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            self.result['neg_effect'] = GameEvent.SHOCK
+            self.result['damage'] = 10
+            return self.result
+
+
+class TrickBag(Skill):      # 较强技能
+    def __init__(self, entity):
+        super().__init__()
+        self.result['MP_cost'] = 5
+        self.entity = entity
+
+    @property
+    def activate(self):
+        if self.result['MP_cost'] > self.entity.MP:  # 技能释放失败
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            dice = random.randint(1, 6)     # 投掷骰子，随机抽取下面三个能力中的一个
+            if dice <= 2:
+                self.result['HP_cost'] = 5        # 扣5点生命并造成20伤害
+                self.result['damage'] = 20
+            elif dice <= 4:
+                self.result['HP_increase'] = 10     # 恢复10点生命
+            else:
+                self.result['operate'] = GameEvent.RESHUFFLE    # 重新抽牌并获得一个盾
+                self.result['pos_effect'] = GameEvent.IMMUNE
+            return self.result
+
+
+class Poison(Skill):
+    def __init__(self, entity):
+        super().__init__()
+        self.result['MP_cost'] = 5
+        self.entity =  entity
+
+    @property
+    def activate(self):
+        if self.result['MP_cost'] > self.entity.MP:   # 技能释放失败
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            dice = random.randint(1, 6)  # 投掷骰子，决定炸弹炸不炸
+            if dice <= 3:
+                self.result['damage'] = 20      # 毒药有效，否则哑弹
+                self.result['neg_effect'] = GameEvent.POISONED
+            else:
+                self.result['damage'] = 5
+            return self.result
+
+
+class Ultimate(Skill):       # 牛逼的大招
+    def __init__(self, entity):
+        super().__init__()
+        self.result['MP_cost'] = 7
+        self.entity = entity
+
+    @property
+    def activate(self):
+        if self.result['MP_cost'] > self.entity.MP:
+            self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
+            return self.result
+        else:
+            self.result['damage'] = 20
+            self.result['neg_effect'] = GameEvent.SHOCK
+            self.result['pos_effect'] = [GameEvent.RAGE, GameEvent.PURIFY, GameEvent.IMMUNE]
+            return self.result
+
 
 class Hero(Creature):
     def __init__(self):
         super().__init__()
-        self.skill_set = {'Medicine': Medicine(self), 'Reshuffle': Reshuffle(self), 'Shield': Shield(self)}
+        self.skill_set = {'Medicine': Medicine(self),
+                          'Reshuffle': Reshuffle(self),
+                          'Shield': Shield(self),
+                          'Attack': Attack(self),
+                          'Ultimate': Ultimate(self)}
+        self.state = []         # 存状态token（如SHOCK，RAGE等）
+        self.info = ''          # 放角色介绍之类的
 
-        self.state = []
-        self.action = []
-
-    def update(self, **kwargs):
-        self.state = kwargs['state']
-        self.action = kwargs['action']
+    '''def update(self, **kwargs):
+        self.state = kwargs['state']'''
 
 
 class Monster(Creature):
     def __init__(self):
         super().__init__()
-        self.skill_set = {}
-        self.state = []
-        self.action = []
+        self.skill_set = {'Attack': Attack(self),
+                          'Medicine': Medicine(self),
+                          'Poison': Poison(self)}
+        self.state = []         # 存状态token（如SHOCK，RAGE等）
+        self.info = ''          # 放角色介绍之类的
 
-    def update(self, **kwargs):
-        self.state = kwargs['state']
-        self.action = kwargs['action']
+    '''def update(self, **kwargs):
+        self.state = kwargs['state']'''
 
 
 # test
 h = Hero()
-print(h.skill_set['Medicine'].activate)
+print(h.skill_set['Shield'].activate)
+m = Monster()
+print(m.skill_set['Medicine'].activate)
