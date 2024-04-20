@@ -14,20 +14,7 @@ def main():
     screen=pygame.display.set_mode(Config.WINDOW_SIZE)
     clock=pygame.time.Clock()
     running=True
-
-    #meau circulate
     
-    # r=rob()
-    # p=Poker('Ace','Clubs')
-
-    # while(running):
-    #     screen.fill((0,0,0))
-    #     p.render(screen)
-    #     pygame.display.update()
-    #     for event in pygame.event.get():
-    #         p.ui.check_click(screen,event)
-    #         if event.type == pygame.QUIT:
-    #             running=0
     meau=MainMeau()
     while(running):
         choice=meau.run(screen)

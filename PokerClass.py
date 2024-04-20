@@ -64,8 +64,8 @@ class Poker:
     def render(self,surface:pygame.Surface)->None:
         self.ui.render(surface)
 
-    def check_click(self,surface:pygame.Surface,event):
-        self.ui.check_click(surface,event)
+    def check_click(self,event):
+        self.ui.check_click(event)
 
     def is_selected(self)->bool:
         return self.ui.is_selected()
@@ -140,15 +140,15 @@ HIGH_POKER=10
 不符合以上任何一种牌型的情况。
 '''
 class PokerDeck:
-    GAP=200
+    GAP=120
     POKER_BACK_PATH='source/pokerback.drawio.png'
     SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
     RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
     def __init__(self,pos:tuple[int,int]):
         self.pos=pos
-        self.img_disPokered = GUI.ImageSet((0,100),PokerDeck.POKER_BACK_PATH,1)
-        self.img_unrevealed = GUI.ImageSet((800,100),PokerDeck.POKER_BACK_PATH,1)
+        self.img_disPokered = GUI.ImageSet((0,360),PokerDeck.POKER_BACK_PATH,1,option=GUI.LEFTCENTER)
+        self.img_unrevealed = GUI.ImageSet((1080,360),PokerDeck.POKER_BACK_PATH,1,option=GUI.RIGHTCENTER)
 
 
         img_disable=pygame.image.load(Poker.POKER_DISABLE_PATH)
@@ -234,13 +234,15 @@ class PokerDeck:
         for poker in self.revealed :
             poker.render(surface)
 
-    def check_click(self,surface:pygame.Surface,event):
+    def check_click(self,event):
         for poker in self.revealed :
-            poker.check_click(surface,event)
+            poker.check_click(event)
+        
 
     def set_pos(self,pos:tuple[int,int]):
         i=-2
         for poker in self.revealed:
+            poker.ui.enabled()
             poker.set_pos((pos[0]+i*PokerDeck.GAP,pos[1]),option=GUI.CENTER)
             i+=1
 
@@ -250,17 +252,19 @@ class PokerDeck:
         for poker in self.revealed:
             if poker.is_selected() :
                 selected_num+=1
-
         if len(self.unrevealed) >= selected_num:
             # Move specified Pokers to disPokered pile
+            new_pokers=[]
             for poker in self.revealed :
                 if poker.is_selected() :
-                    self.revealed.remove(poker)
                     self.disPokered.append(poker)
+                else:
+                    new_pokers.append(poker)
+                    
             # Replace with random Pokers from the unrevealed pile
             random.shuffle(self.unrevealed)  # Shuffle for randomness
-            new_Pokers = [self.unrevealed.pop(0) for _ in range(selected_num)]
-            self.revealed.extend(new_Pokers)
+            new_pokers+= [self.unrevealed.pop(0) for _ in range(selected_num)]
+            self.revealed=new_pokers
             self.set_pos(self.pos)
 
     def show_revealed(self):

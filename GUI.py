@@ -6,9 +6,12 @@ from typing import Dict, Tuple, Sequence,List
 
 LEFTTOP = 0
 CENTER = 1
-PATH_IN = 2 # 从路径读取图片
-FILE_IN = 3 # 从变量获取图片
-LIST_IN = 4
+RIGHTTOP = 2
+LEFTCENTER = 3
+RIGHTCENTER = 4
+PATH_IN = 5 # 从路径读取图片
+FILE_IN = 6 # 从变量获取图片
+LIST_IN = 7
 
 class ImageSet(object):
     def __init__(self,
@@ -85,6 +88,21 @@ class ImageSet(object):
                                     pos[1]-int(self.image_heigh/2),\
                                     self.image_width,\
                                     self.image_heigh)
+        elif option==RIGHTTOP :
+            self.rect = pygame.Rect(pos[0]-self.image_width,\
+                                    pos[1],\
+                                    self.image_width,\
+                                    self.image_heigh)
+        elif option==LEFTCENTER :
+            self.rect = pygame.Rect(pos[0],\
+                                    pos[1]-int(self.image_heigh/2),\
+                                    self.image_width,\
+                                    self.image_heigh)
+        elif option==RIGHTCENTER :
+            self.rect = pygame.Rect(pos[0]-self.image_width,\
+                                    pos[1]-int(self.image_heigh/2),\
+                                    self.image_width,\
+                                    self.image_heigh)
         else :
             raise Exception("No such option")
     def change_status(self,value:int):
@@ -115,16 +133,16 @@ class Button(ImageSet):
             bflag = self.rect.collidepoint(point)
         return bflag
 
-    def check_click(self, screen:pygame.Surface, event):
+    def check_click(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
             self.selected()
-            self.render(screen)
-            pygame.display.update()
-            time.sleep(0.1)
+            return 0
+        elif event.type == pygame.MOUSEBUTTONUP :
+            flag=0
+            if self.status == 2 and self.is_over(event.pos):
+                flag=1
             self.enabled()
-            self.render(screen)
-            pygame.display.update()
-            return 1
+            return flag
         else:
             return 0
 
@@ -175,7 +193,7 @@ class Rod(Button):
             else:
                 bflag = self.rect.collidepoint(point)
         return bflag
-    def check_click(self, screen:pygame.Surface, event):
+    def check_click(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
             self.status=3-self.status
             return 1
