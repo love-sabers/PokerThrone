@@ -1,8 +1,8 @@
+import pygame
 from Const import GameEvent
-import random
-
-class Skill(object):
-    pass
+from PokerClass import PokerDeck
+import SkillClass
+import GUI
 
 class Creature(object):
     """
@@ -54,70 +54,32 @@ class Creature(object):
             self.MP-=value
             return 0
 
-
-class Shield(Skill):
-    def __init__(self, entity):
-        self.MP_cost = 3
-        self.entity = entity
-
-    @property
-    def activate(self):
-        if self.MP_cost > self.entity.MP:       # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.IMMUNE
-
-
-class Medicine(Skill):
-    def __init__(self, entity):
-        self.MP_cost = 2
-        self.entity = entity
-
-    @property
-    def activate(self):
-        if self.MP_cost > self.entity.MP:  # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.HEAL
-
-class Rage(Skill):
-    def __init__(self, entity):
-        self.MP_cost = 3
-        self.entity = entity
-
-    @property
-    def activate(self):
-        if self.MP_cost > self.entity.MP:  # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.RAGE
-
-class Shockwave(Skill):
-    def __init__(self, entity):
-        self.MP_cost = 4
-        self.entity = entity
-
-    @property
-    def activate(self):
-        if self.MP_cost > self.entity.MP:   # 技能释放失败
-            return GameEvent.SKILL_RELEASE_FAIL
-        return GameEvent.ATTACK, GameEvent.SHOCK
-
-class Reshuffle(Skill):
-    def __init__(self, entity):
-        self.MP_cost = 1
-        self.entity = entity
-
-    @property
-    def activate(self):
-        if self.MP_cost > self.entity.MP:
-            return GameEvent.SKILL_RELEASE_FAIL
-        return Reshuffle
-
 class Hero(Creature):
-    def __init__(self):
+    DISCARD_PATH='source/discard.png'
+    PASS_PATH='source/pass.png'
+    def __init__(self,pos:tuple[int,int]):
         super().__init__()
-        self.skill_set = {'Medicine': Medicine(self), 'Reshuffle': Reshuffle(self), 'Shield': Shield(self)}
-
+        self.poker_deck=PokerDeck(pos)
+        self.discard=GUI.Button((pos[0]+100,pos[1]+140),self.DISCARD_PATH,3,option=GUI.CENTER)
+        self.pass_round=GUI.Button((pos[0]-100,pos[1]+140),self.PASS_PATH,3,option=GUI.CENTER)
+        self.skill_set = {'Medicine': SkillClass.Medicine(self), 
+                          'Reshuffle': SkillClass.Reshuffle(self), 
+                          'Shield': SkillClass.Shield(self)}
         self.state = []
         self.action = []
+
+    def check_click(self,event):
+        self.poker_deck.check_click(event)
+        if(self.discard.check_click(event)):
+            self.poker_deck.reload_user()
+        if(self.pass_round.check_click(event)):
+            self.poker_deck.update_revealed()
+        return 1,GameEvent.ATTACK
+    
+    def render(self,surface:pygame.Surface):
+        self.discard.render(surface)
+        self.pass_round.render(surface)
+        self.poker_deck.render(surface)
 
     def update(self, **kwargs):
         self.state = kwargs['state']
@@ -134,8 +96,3 @@ class Monster(Creature):
     def update(self, **kwargs):
         self.state = kwargs['state']
         self.action = kwargs['action']
-
-
-# test
-h = Hero()
-print(h.skill_set['Medicine'].activate)
