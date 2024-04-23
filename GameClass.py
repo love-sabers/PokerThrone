@@ -2,7 +2,7 @@ import pygame
 import sys
 import GUI
 from Const import Config
-from CreatureClass import Hero
+from CreatureClass import *
 
 game_running=1
 
@@ -10,6 +10,7 @@ class Game(object):
     def __init__(self,screen:pygame.Surface):
         self.screen=screen
         self.hero=Hero((540,360))
+        self.hero_fake=Hero((540,180))
         pass
     def game_init(self):
         pass
@@ -24,10 +25,14 @@ class Game(object):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if(ret==1):
+                    running=self.hero_fake.deal(game_event)
+
+            self.hero_fake.render_hp(self.screen)
             self.hero.render(self.screen)        
             pygame.display.update()
             pygame.time.Clock().tick(Config.FPS)
-        # deal(game_event_set)
+            return running
         
     def game_quit(self):
         pass
@@ -40,7 +45,7 @@ class Game(object):
         self.game_load()
         game_running=1
         while(game_running):
-            self.game_run()
+            game_running=self.game_run()
             self.game_save()
         self.game_quit()
         pass

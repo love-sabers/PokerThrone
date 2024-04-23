@@ -7,14 +7,14 @@ from Const import GameEvent
 class Skill(object):
     IMAGE_PATH='source/play.png'
     def __init__(self,pos:tuple[int,int],handtype_check_code:int):
-        self.result = {'MP_cost': GameEvent.NULL,#int
-                       'HP_cost': GameEvent.NULL,#int
-                       'MP_increase': GameEvent.NULL,#int
-                       'HP_increase': GameEvent.NULL,#int
-                       'pos_effect': GameEvent.NULL,#list        # 正面效果是带给自己的正面效果
-                       'neg_effect': GameEvent.NULL,#list        # 负面效果是带给别人的负面效果
-                       'damage': GameEvent.NULL,#int
-                       'operate': GameEvent.NULL#list            # 对游戏其他部分的操作请求，如换牌
+        self.result = {'MP_cost': 0,#int
+                       'HP_cost': 0,#int
+                       'MP_increase': 0,#int
+                       'HP_increase': 0,#int
+                       'pos_effect': [],#list        # 正面效果是带给自己的正面效果
+                       'neg_effect': [],#list        # 负面效果是带给别人的负面效果
+                       'damage': 0,#int
+                       'operate': []#list            # 对游戏其他部分的操作请求，如换牌
         }
         self.ui=Button(pos,self.IMAGE_PATH,3,GUI.CENTER)         
         self.handtype_check_code=handtype_check_code
