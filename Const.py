@@ -19,4 +19,5 @@ class GameEvent(Enum):
     SHOCK=9
     RESHUFFLE=10
     ATTACK=11
-    DEFENSE=12
+    POISONED=12
+    PURIFY=13
