@@ -8,6 +8,7 @@ from Const import Config
 from PokerClass import Poker
 from GUI import Rod
 
+
 def main():
     #init pygame
     pygame.init()
