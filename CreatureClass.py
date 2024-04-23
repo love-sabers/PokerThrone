@@ -1,4 +1,8 @@
+import pygame
 from Const import GameEvent
+from PokerClass import PokerDeck
+import SkillClass
+import GUI
 import random
 
 
@@ -12,7 +16,6 @@ class Skill(object):
                        'neg_effect': GameEvent.NULL,        # 负面效果是带给别人的负面效果
                        'damage': GameEvent.NULL,
                        'operate': GameEvent.NULL}           # 对游戏其他部分的操作请求，如换牌
-
 
 class Creature(object):
     """
@@ -63,7 +66,6 @@ class Creature(object):
         else:
             self.MP-=value
             return 0
-
 
 class Shield(Skill):        # 普通技能
     def __init__(self, entity):
@@ -210,7 +212,7 @@ class Ultimate(Skill):       # 牛逼的大招
 
     @property
     def activate(self):
-        if self.result['MP_cost'] > self.entity.MP:
+        if self.result['MP_cost'] > self.entity.MP
             self.result['state'] = GameEvent.SKILL_RELEASE_FAIL
             return self.result
         else:
@@ -220,10 +222,16 @@ class Ultimate(Skill):       # 牛逼的大招
             return self.result
 
 
+
 class Hero(Creature):
-    def __init__(self):
+    DISCARD_PATH='source/discard.png'
+    PASS_PATH='source/pass.png'
+    def __init__(self,pos:tuple[int,int]):
         super().__init__()
-        self.skill_set = {'Medicine': Medicine(self),
+        self.poker_deck=PokerDeck(pos)
+        self.discard=GUI.Button((pos[0]+100,pos[1]+140),self.DISCARD_PATH,3,option=GUI.CENTER)
+        self.pass_round=GUI.Button((pos[0]-100,pos[1]+140),self.PASS_PATH,3,option=GUI.CENTER)
+         self.skill_set = {'Medicine': Medicine(self),
                           'Reshuffle': Reshuffle(self),
                           'Shield': Shield(self),
                           'Attack': Attack(self),
@@ -231,9 +239,26 @@ class Hero(Creature):
         self.state = []         # 存状态token（如SHOCK，RAGE等）
         self.info = ''          # 放角色介绍之类的
 
+    def check_click(self,event):
+        self.poker_deck.check_click(event)
+        if(self.discard.check_click(event)):
+            self.poker_deck.reload_user()
+        if(self.pass_round.check_click(event)):
+            self.poker_deck.update_revealed()
+        return 1,GameEvent.ATTACK
+    
+    def render(self,surface:pygame.Surface):
+        self.discard.render(surface)
+        self.pass_round.render(surface)
+        self.poker_deck.render(surface)
+
+    def update(self, **kwargs):
+        self.state = kwargs['state']
+        self.action = kwargs['action']
+       
+
     '''def update(self, **kwargs):
         self.state = kwargs['state']'''
-
 
 class Monster(Creature):
     def __init__(self):

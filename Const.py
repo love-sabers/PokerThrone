@@ -1,9 +1,11 @@
+from enum import Enum,unique
 class Config(object):
     WINDOW_SIZE=(1080,720)
-    FPS=30
+    FPS=60
     pass
 
-class GameEvent(object):
+@unique
+class GameEvent(Enum):
     NULL=0
     ADD_HP_OVER=1
     LOSE_HP_OVER=2
