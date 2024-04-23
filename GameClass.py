@@ -20,7 +20,7 @@ class Game(object):
             self.screen.fill((0,0,0))
             for event in pygame.event.get():
                 ret,game_event=self.hero.check_click(event)
-                game_event_set.append(game_event)
+                # game_event_set.append(game_event)
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
