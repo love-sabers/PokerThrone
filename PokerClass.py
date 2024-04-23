@@ -206,25 +206,33 @@ class PokerDeck:
         is_flush = max(suit_counts.values()) == 5
         is_straight = len(set(ranks)) == 5 and (max(ranks) - min(ranks) == 4)
 
+        ret_set=[]
         if is_flush and is_straight:
             if ranks == [10, 11, 12, 13, 14]:  # Checking for Ace high straight flush (Royal Flush)
-                return ROYAL_FLUSH
-            return STRAIGHT_FLUSH
+                ret_set.append(ROYAL_FLUSH)
+            ret_set.append(STRAIGHT_FLUSH)
         if 4 in rank_counts.values():
-            return FOUR_AKIND
+            ret_set.append(FOUR_AKIND)
+            ret_set.append(THREE_AKIND)
+            ret_set.append(ONE_PAIR)
         if sorted(rank_counts.values()) == [2, 3]:
-            return FULL_HOUSE
+            ret_set.append(FULL_HOUSE)
+            ret_set.append(THREE_AKIND)
+            ret_set.append(ONE_PAIR)
+            ret_set.append(TWO_PAIRS)
         if is_flush:
-            return FLUSH
+            ret_set.append(FLUSH)
         if is_straight:
-            return STRAIGHT
+            ret_set.append(STRAIGHT)
         if 3 in rank_counts.values():
-            return THREE_AKIND
+            ret_set.append(THREE_AKIND)
+            ret_set.append(ONE_PAIR)
         if list(rank_counts.values()).count(2) == 2:
-            return TWO_PAIRS
+            ret_set.append(TWO_PAIRS)
+            ret_set.append(ONE_PAIR)
         if list(rank_counts.values()).count(2) == 1:
-            return ONE_PAIR
-        return HIGH_POKER  # High Poker
+            ret_set.append(ONE_PAIR)
+        return ret_set  # High Poker
 
     def render(self,surface:pygame.Surface)->None:
         if len(self.disPokered) :

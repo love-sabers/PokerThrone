@@ -134,6 +134,8 @@ class Button(ImageSet):
         return bflag
 
     def check_click(self, event):
+        if(self.status<=0):
+            return 0
         if event.type == pygame.MOUSEBUTTONDOWN and self.is_over(event.pos):
             self.selected()
             return 0
@@ -157,6 +159,10 @@ class Button(ImageSet):
 
     def selected(self):
         self.status = 2
+
+    def is_selected(self):
+        return self.status==2
+
 
 class Rod(Button):
     """

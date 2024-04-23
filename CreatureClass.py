@@ -3,8 +3,9 @@ import SkillClass
 import GUI
 import random
 from Const import GameEvent
+import PokerClass
 from PokerClass import PokerDeck
-
+ 
 class Creature(object):
     """
     The base class of all Creature
@@ -61,36 +62,51 @@ class Hero(Creature):
     def __init__(self,pos:tuple[int,int]):
         super().__init__()
         self.poker_deck=PokerDeck(pos)
-        self.discard=GUI.Button((pos[0]+100,pos[1]+140),self.DISCARD_PATH,3,option=GUI.CENTER)
-        self.pass_round=GUI.Button((pos[0]-100,pos[1]+140),self.PASS_PATH,3,option=GUI.CENTER)
-        self.skill_set = {'Medicine': SkillClass.Medicine(self),
-                          'Reshuffle': SkillClass.Reshuffle(self),
-                          'Shield': SkillClass.Shield(self),
-                          'Attack': SkillClass.Attack(self),
-                          'Ultimate': SkillClass.Ultimate(self)}
+        self.discard=GUI.Button((pos[0]+80,pos[1]+150),self.DISCARD_PATH,3,option=GUI.CENTER)
+        self.pass_round=GUI.Button((pos[0]-80,pos[1]+150),self.PASS_PATH,3,option=GUI.CENTER)
+        w_gap=180
+        h_gap=140
+        w_fix=70
+        h_fix=10
+        self.skill_set =[SkillClass.Attack((pos[0]-2*w_gap-w_fix,pos[1]+h_gap+h_fix),PokerClass.ONE_PAIR),
+                         SkillClass.Shield((pos[0]-w_gap-w_fix,pos[1]+h_gap+h_fix),PokerClass.THREE_AKIND),
+                         SkillClass.Medicine((pos[0]-2*w_gap-w_fix,pos[1]+2*h_gap+h_fix),PokerClass.TWO_PAIRS),
+                         SkillClass.Getcard((pos[0]-w_gap-w_fix,pos[1]+2*h_gap+h_fix),PokerClass.FOUR_AKIND),
+                         SkillClass.Rage((pos[0]+w_gap+w_fix,pos[1]+h_gap+h_fix),PokerClass.FLUSH),
+                         SkillClass.Shockwave((pos[0]+2*w_gap+w_fix,pos[1]+h_gap+h_fix),PokerClass.STRAIGHT),
+                         SkillClass.Poison((pos[0]+w_gap+w_fix,pos[1]+2*h_gap+h_fix),PokerClass.STRAIGHT_FLUSH),
+                         SkillClass.TrickBag((pos[0]+2*w_gap+w_fix,pos[1]+2*h_gap+h_fix),PokerClass.FULL_HOUSE),
+                         SkillClass.Ultimate((pos[0],pos[1]+2*h_gap+h_fix),PokerClass.ROYAL_FLUSH)
+        ]
+        for skill in self.skill_set:
+            skill.ui.disabled()
         self.state = []         # 存状态token（如SHOCK，RAGE等）
         self.info = ''          # 放角色介绍之类的
 
     def check_click(self,event):
         self.poker_deck.check_click(event)
-        if(self.discard.check_click(event)):
+        if self.discard.check_click(event):
             self.poker_deck.reload_user()
-        if(self.pass_round.check_click(event)):
+        if self.pass_round.check_click(event):
             self.poker_deck.update_revealed()
-        return 1,GameEvent.ATTACK
+
+        flag=0
+        ret_set=0
+        for skill in self.skill_set:
+            if(skill.check_click(event)):
+                flag=1
+                ret_set=skill.activate()
+        return flag,ret_set
     
     def render(self,surface:pygame.Surface):
         self.discard.render(surface)
         self.pass_round.render(surface)
         self.poker_deck.render(surface)
-
-    def update(self, **kwargs):
-        self.state = kwargs['state']
-        self.action = kwargs['action']
-       
-
-    '''def update(self, **kwargs):
-        self.state = kwargs['state']'''
+        hand=self.poker_deck.evaluate_hand()
+        for skill in self.skill_set:
+            if hand != None:
+                skill.update(hand)
+            skill.render(surface)
 
 class Monster(Creature):
     def __init__(self):

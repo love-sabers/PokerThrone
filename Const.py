@@ -12,12 +12,11 @@ class GameEvent(Enum):
     ADD_MP_OVER=3
     LOSE_MP_OVER=4
     SKILL_RELEASE=5
-    SKILL_RELEASE_FAIL=-1
     IMMUNE=6
     HEAL=7
     RAGE=8
     SHOCK=9
-    RESHUFFLE=10
+    GETCARD=10
     ATTACK=11
     POISONED=12
     PURIFY=13

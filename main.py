@@ -3,11 +3,7 @@ import sys
 import MeauClass
 from MeauClass import MainMeau
 from GameClass import Game
-from Const import GameEvent
 from Const import Config
-from PokerClass import Poker
-from GUI import Rod
-
 
 def main():
     #init pygame
