@@ -78,10 +78,48 @@ class Hero(Creature):
                          SkillClass.TrickBag((pos[0]+2*w_gap+w_fix,pos[1]+2*h_gap+h_fix),PokerClass.FULL_HOUSE),
                          SkillClass.Ultimate((pos[0],pos[1]+2*h_gap+h_fix),PokerClass.ROYAL_FLUSH)
         ]
-        for skill in self.skill_set:
-            skill.ui.disabled()
+        self.poker_deck.update_revealed()
         self.state = []         # 存状态token（如SHOCK，RAGE等）
         self.info = ''          # 放角色介绍之类的
+
+    def deal(self,game_event:dict):
+        damage=game_event.get('damage')
+        running_flag=1
+        if(self.HP<=damage):
+            running_flag=0
+        else:
+            self.HP = self.HP - int(damage)
+        return running_flag
+
+    def render_hp(self,surface:pygame.Surface):
+        # 定义血条颜色
+        RED = (255, 0, 0)
+        GREEN = (0, 255, 0)
+        BLACK = (0, 0, 0)
+
+        # 定义血条位置和尺寸
+        x, y = 50, 50  # 血条在屏幕上的位置
+        max_width, height = 200, 20  # 血条的最大宽度和高度
+        border_thickness = 2  # 边框的厚度
+
+        # 计算当前血条长度
+        current_width = max(0, 2*self.HP)  # 假设满血是100
+
+        # 绘制血条背景（红色）
+        pygame.draw.rect(surface, RED, (x, y, max_width, height))
+
+        # 绘制当前血量（绿色）
+        if current_width > 0:
+            pygame.draw.rect(surface, GREEN, (x, y, current_width, height))
+
+        # 绘制黑色边框
+        pygame.draw.rect(surface, (0, 0, 0), (x, y, max_width, height), border_thickness)
+
+        # 设置字体和文字
+        font = pygame.font.Font(None, 24)  # 使用默认字体，24点大小
+        text = font.render(f'{self.HP}/100', True, BLACK)
+        text_rect = text.get_rect(center=(x + max_width / 2, y + height / 2))
+        surface.blit(text, text_rect)
 
     def check_click(self,event):
         self.poker_deck.check_click(event)
@@ -96,17 +134,31 @@ class Hero(Creature):
             if(skill.check_click(event)):
                 flag=1
                 ret_set=skill.activate()
+        if(flag==1):
+            self.poker_deck.update_revealed()
         return flag,ret_set
-    
+
+
     def render(self,surface:pygame.Surface):
         self.discard.render(surface)
         self.pass_round.render(surface)
         self.poker_deck.render(surface)
         hand=self.poker_deck.evaluate_hand()
+        # 设置字体和文字
+        COLOR_CH = (248, 195, 205)
+        font = pygame.font.Font(None, 40)
+        if(len(self.poker_deck.disPokered)!=0):
+            text = font.render(f'{len(self.poker_deck.disPokered)}', True, COLOR_CH)
+            text_rect = text.get_rect(center=(60,360))
+            surface.blit(text, text_rect)
+        text = font.render(f'{len(self.poker_deck.unrevealed)}', True, COLOR_CH)
+        text_rect = text.get_rect(center=(1020, 360))
+        surface.blit(text, text_rect)
         for skill in self.skill_set:
             if hand != None:
                 skill.update(hand)
             skill.render(surface)
+
 
 class Monster(Creature):
     def __init__(self):
