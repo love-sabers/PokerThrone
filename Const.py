@@ -20,3 +20,6 @@ class GameEvent(Enum):
     ATTACK=11
     POISONED=12
     PURIFY=13
+    POISONED2=14
+    POISONED3=15
+
