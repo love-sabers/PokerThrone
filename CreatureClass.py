@@ -33,7 +33,7 @@ class Creature(object):
             return 0
         
     def lose_HP(self,value):
-        if(self.HP-value<Creature.base_HP_min):
+        if(self.HP-value<=Creature.base_HP_min):
             self.HP=Creature.base_HP_min
             return GameEvent.LOSE_HP_OVER
         else:
@@ -49,7 +49,7 @@ class Creature(object):
             return 0
         
     def lose_MP(self,value):
-        if(self.MP-value<Creature.base_MP_min):
+        if(self.MP-value<=Creature.base_MP_min):
             self.MP=Creature.base_MP_min
             return GameEvent.LOSE_MP_OVER
         else:
