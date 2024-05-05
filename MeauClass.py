@@ -5,6 +5,9 @@ QUIT=0
 PLAY=1
 OPTION=2
 class MainMeau(object):
+    '''
+    主菜单界面
+    '''
     LOGO_PATH   ='source/logo.png'
     PALY_PATH   ='source/play.png'
     OPTION_PATH ='source/option.png'

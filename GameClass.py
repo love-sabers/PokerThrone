@@ -16,6 +16,8 @@ class Game(object):
     def game_init(self):
         pass
     def game_run(self):
+        #以过牌或者释放技能视作一回合结尾
+        #每回合monster行动一次
         running=1
         while(running):
             self.screen.fill((0,0,0))
@@ -56,6 +58,7 @@ class Game(object):
 
     @staticmethod
     def deal_event(host: Creature, target: Creature, game_event: dict):
+        #处理游戏事件与状态
         if(game_event=={}):
             return 1
         """

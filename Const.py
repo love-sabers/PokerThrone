@@ -1,11 +1,15 @@
+#此部分为游戏常量
 from enum import Enum,unique
+
 class Config(object):
+    #游戏系统参数
     WINDOW_SIZE=(1080,720)
     FPS=60
     pass
 
 @unique
 class GameEvent(Enum):
+    #游戏事件常量
     NULL=0
     ADD_HP_OVER=1
     LOSE_HP_OVER=2
