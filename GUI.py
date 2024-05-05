@@ -162,7 +162,6 @@ class Button(ImageSet):
     def is_selected(self):
         return self.status==2
 
-
 class Rod(Button):
     """
     A button, could be selected
