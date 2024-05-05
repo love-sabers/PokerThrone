@@ -39,7 +39,6 @@ class Game(object):
             pygame.display.update()
             pygame.time.Clock().tick(Config.FPS)
         return game_state
-        
     def game_quit(self):
         pass
     def game_save(self):
