@@ -162,7 +162,11 @@ class Hero(Creature):
         if(flag==1):
             self.discard_num=self.discard_num_max
             self.poker_deck.update_revealed()
-    
+            self.discard.enabled()
+            
+        if(self.discard_num==0):
+            self.discard.disabled()
+            
         return flag,ret_set
 
 
