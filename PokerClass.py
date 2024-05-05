@@ -2,17 +2,6 @@ import pygame
 import random
 import GUI
 from GUI import Rod
-'''
-    Poker 类
-        属性:
-
-        rank: 表示牌的等级(2, 3, ..., 10, Jack, Queen, King, Ace)
-        suit: 表示牌的花色(Hearts, Diamonds, Clubs, Spades)
-        方法:
-
-        __init__(self, rank, suit): 构造方法,初始化一张牌的等级和花色。
-        __repr__(self): 特殊方法,用于定义对象的“官方”字符串表示,这里返回例如"Ace of Spades"这样的字符串,方便打印和查看。
-'''
 
 OPTION_SINGLE_IN = 1
 OPTION_GROUP_IN = 2
@@ -71,40 +60,6 @@ class Poker:
         return self.ui.is_selected()
 
 
-
-'''
-Deck 类
-Pokers:
-类型: list of Poker
-描述: 存储未抽出的牌。这个列表在初始化时被创建为一幅完整的52副牌堆,并在牌堆需要被重置时重新生成和打乱。
-disPokered:
-类型: list of Poker
-描述: 存储已经被弃用的牌。这包括之前公开过但现在不再需要的牌。
-revealed:
-类型: list of Poker
-描述: 存储当前公开的牌,这些牌是玩家可以看到的。
-unrevealed:
-类型: list of Poker
-描述: 存储还未公开的牌。从这个列表中抽牌来更新revealed列表。
-
-Deck 类方法
-__init__(self):
-作用: 初始化Deck类的实例,调用reset_deck方法来创建和打乱一副牌,并设置初始的牌堆状态。
-reset_deck(self):
-作用: 重置整个牌堆。这包括生成新的52张牌,打乱这些牌,以及清空disPokered、revealed和unrevealed列表。将所有的牌都放入unrevealed列表中,准备进行牌局。
-update_revealed(self):
-作用: 更新公开牌堆的操作方法。此方法会将revealed牌堆的牌移动到disPokered牌堆。如果unrevealed牌堆的牌少于5张,则将disPokered的牌重新加入到unrevealed牌堆,打乱后再抽牌。最后,从unrevealed牌堆中抽出最多5张牌移到revealed牌堆中。
-show_revealed(self):
-返回: list of Poker
-作用: 返回当前公开的牌堆。这个方法允许外部查看revealed牌堆中的牌。
-show_unrevealed(self):
-返回: list of Poker
-作用: 返回未公开的牌堆。这个方法允许外部查看unrevealed牌堆中的牌。
-show_disPokered(self):
-返回: list of Poker
-作用: 返回弃牌堆。这个方法允许外部查看disPokered牌堆中的牌。
-'''
-
 ROYAL_FLUSH=1
 STRAIGHT_FLUSH=2
 FOUR_AKIND=3
@@ -140,6 +95,21 @@ HIGH_POKER=10
 不符合以上任何一种牌型的情况。
 '''
 class PokerDeck:
+    '''
+    Deck 类
+    Pokers:
+    类型: list of Poker
+    描述: 存储未抽出的牌。这个列表在初始化时被创建为一幅完整的52副牌堆,并在牌堆需要被重置时重新生成和打乱。
+    disPokered:
+    类型: list of Poker
+    描述: 存储已经被弃用的牌。这包括之前公开过但现在不再需要的牌。
+    revealed:
+    类型: list of Poker
+    描述: 存储当前公开的牌,这些牌是玩家可以看到的。
+    unrevealed:
+    类型: list of Poker
+    描述: 存储还未公开的牌。从这个列表中抽牌来更新revealed列表。
+    '''
     GAP=120
     POKER_BACK_PATH='source/pokerback.drawio.png'
     SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
@@ -174,6 +144,7 @@ class PokerDeck:
         self.disPokered = []
 
     def reset_deck(self):
+        '''重置整个牌堆。这包括生成新的52张牌,打乱这些牌,以及清空disPokered、revealed和unrevealed列表。将所有的牌都放入unrevealed列表中,准备进行牌局。'''
         """ Resets the entire deck, shuffles the Pokers, and clears all piles. """
         self.unrevealed+=self.revealed+self.disPokered
         random.shuffle(self.unrevealed)
@@ -181,6 +152,7 @@ class PokerDeck:
         self.revealed = []
 
     def update_revealed(self):
+        '''更新公开牌堆的操作方法。此方法会将revealed牌堆的牌移动到disPokered牌堆。如果unrevealed牌堆的牌少于5张,则将disPokered的牌重新加入到unrevealed牌堆,打乱后再抽牌。最后,从unrevealed牌堆中抽出最多5张牌移到revealed牌堆中。'''
         self.disPokered.extend(self.revealed)
         self.revealed = []
 
@@ -196,6 +168,7 @@ class PokerDeck:
         self.set_pos(self.pos)
 
     def evaluate_hand(self):
+        #比较并返回当前牌型
         if len(self.revealed) < 5:
             return None  # Not enough Pokers to evaluate
 
@@ -299,15 +272,3 @@ class PokerDeck:
 
     def show_disPokered(self):
         return self.disPokered
-
-
-# #Usage
-# deck = Deck()
-# print("Initial unrevealed Pokers:", deck.show_unrevealed())
-# for i in range(12):
-#     deck.update_revealed()
-#     print(type(deck.show_revealed()),len(deck.show_revealed()))
-#     print("Revealed Pokers:", len(deck.show_revealed()))
-#     print("Remaining Unrevealed Pokers after update:", len(deck.show_unrevealed()))
-#     print("DisPokered Pokers:", len(deck.show_disPokered()))
-#     print("Poker hand rank:", deck.evaluate_hand())

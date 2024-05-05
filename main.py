@@ -12,6 +12,7 @@ def main():
     clock=pygame.time.Clock()
     running=True
     
+    #Game
     meau=MainMeau()
     while(running):
         choice=meau.run(screen)

@@ -2,7 +2,6 @@ import pygame
 import time
 import os
 from typing import Dict, Tuple, Sequence,List
-#Type
 
 LEFTTOP = 0
 CENTER = 1
@@ -11,7 +10,7 @@ LEFTCENTER = 3
 RIGHTCENTER = 4
 PATH_IN = 5 # 从路径读取图片
 FILE_IN = 6 # 从变量获取图片
-LIST_IN = 7
+LIST_IN = 7 # 直接传入图片
 
 class ImageSet(object):
     def __init__(self,
