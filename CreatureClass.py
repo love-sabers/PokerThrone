@@ -55,15 +55,48 @@ class Creature(object):
         else:
             self.MP-=value
             return 0
+        
+    def render_hp(self,pos,surface:pygame.Surface,max_width=200,height=20):
+        # 定义血条颜色
+        RED = (255, 0, 0)
+        GREEN = (0, 255, 0)
+        BLACK = (0, 0, 0)
+
+        # 定义血条位置和尺寸
+        x, y = pos[0], pos[1]  # 血条在屏幕上的位置
+        # max_width, height 血条的最大宽度和高度
+        border_thickness = 2  # 边框的厚度
+
+        # 计算当前血条长度
+        current_width = max(0, (self.HP/self.base_HP_max)*max_width)  # 假设满血是100
+
+        # 绘制血条背景（红色）
+        pygame.draw.rect(surface, RED, (x, y, max_width, height))
+
+        # 绘制当前血量（绿色）
+        if current_width > 0:
+            pygame.draw.rect(surface, GREEN, (x, y, current_width, height))
+
+        # 绘制黑色边框
+        pygame.draw.rect(surface, (0, 0, 0), (x, y, max_width, height), border_thickness)
+
+        # 设置字体和文字
+        font = pygame.font.Font(None, 24)  # 使用默认字体，24点大小
+        text = font.render(f'{self.HP}/100', True, BLACK)
+        text_rect = text.get_rect(center=(x + max_width / 2, y + height / 2))
+        surface.blit(text, text_rect)    
 
 class Hero(Creature):
     DISCARD_PATH='source/discard.png'
     PASS_PATH='source/pass.png'
     def __init__(self,pos:tuple[int,int]):
         super().__init__()
+        self.pos=pos
         self.poker_deck=PokerDeck(pos)
         self.discard=GUI.Button((pos[0]+80,pos[1]+150),self.DISCARD_PATH,3,option=GUI.CENTER)
         self.pass_round=GUI.Button((pos[0]-80,pos[1]+150),self.PASS_PATH,3,option=GUI.CENTER)
+        self.discard_num_max=3
+        self.discard_num=self.discard_num_max
         w_gap=180
         h_gap=140
         w_fix=70
@@ -82,59 +115,22 @@ class Hero(Creature):
         self.state = []         # 存状态token（如SHOCK，RAGE等）
         self.info = ''          # 放角色介绍之类的
 
-    def deal(self,game_event:dict):
-        damage=game_event.get('damage')
-        running_flag=1
-        if(self.HP<=damage):
-            running_flag=0
-        else:
-            self.HP = self.HP - int(damage)
-        return running_flag
-
-    def render_hp(self,surface:pygame.Surface):
-        # 定义血条颜色
-        RED = (255, 0, 0)
-        GREEN = (0, 255, 0)
-        BLACK = (0, 0, 0)
-
-        # 定义血条位置和尺寸
-        x, y = 50, 50  # 血条在屏幕上的位置
-        max_width, height = 200, 20  # 血条的最大宽度和高度
-        border_thickness = 2  # 边框的厚度
-
-        # 计算当前血条长度
-        current_width = max(0, 2*self.HP)  # 假设满血是100
-
-        # 绘制血条背景（红色）
-        pygame.draw.rect(surface, RED, (x, y, max_width, height))
-
-        # 绘制当前血量（绿色）
-        if current_width > 0:
-            pygame.draw.rect(surface, GREEN, (x, y, current_width, height))
-
-        # 绘制黑色边框
-        pygame.draw.rect(surface, (0, 0, 0), (x, y, max_width, height), border_thickness)
-
-        # 设置字体和文字
-        font = pygame.font.Font(None, 24)  # 使用默认字体，24点大小
-        text = font.render(f'{self.HP}/100', True, BLACK)
-        text_rect = text.get_rect(center=(x + max_width / 2, y + height / 2))
-        surface.blit(text, text_rect)
-
     def check_click(self,event):
+        flag=0
+        ret_set={}
         self.poker_deck.check_click(event)
         if self.discard.check_click(event):
-            self.poker_deck.reload_user()
+            if(self.discard_num>0):
+                self.discard_num-=self.poker_deck.reload_user()
         if self.pass_round.check_click(event):
-            self.poker_deck.update_revealed()
+            flag=1
 
-        flag=0
-        ret_set=0
         for skill in self.skill_set:
             if(skill.check_click(event)):
                 flag=1
                 ret_set=skill.activate()
         if(flag==1):
+            self.discard_num=self.discard_num_max
             self.poker_deck.update_revealed()
         return flag,ret_set
 
@@ -143,38 +139,46 @@ class Hero(Creature):
         self.discard.render(surface)
         self.pass_round.render(surface)
         self.poker_deck.render(surface)
+        self.render_hp((self.pos[0]-100,self.pos[1]+200),surface)
+
         hand=self.poker_deck.evaluate_hand()
-        # 设置字体和文字
-        COLOR_CH = (248, 195, 205)
-        font = pygame.font.Font(None, 40)
-        if(len(self.poker_deck.disPokered)!=0):
-            text = font.render(f'{len(self.poker_deck.disPokered)}', True, COLOR_CH)
-            text_rect = text.get_rect(center=(60,360))
-            surface.blit(text, text_rect)
-        text = font.render(f'{len(self.poker_deck.unrevealed)}', True, COLOR_CH)
-        text_rect = text.get_rect(center=(1020, 360))
-        surface.blit(text, text_rect)
         for skill in self.skill_set:
             if hand != None:
                 skill.update(hand)
             skill.render(surface)
 
+        COLOR_CH = (255, 255, 255)
+        font = pygame.font.Font(None, 40)
+        text = font.render(f'{self.discard_num}', True, COLOR_CH)
+        text_rect = text.get_rect(center=(540+140, 360+130))
+        surface.blit(text, text_rect)    
+
 
 class Monster(Creature):
-    def __init__(self):
+    def __init__(self,pos:tuple[int,int]):
         super().__init__()
-        self.skill_set = {'Attack': SkillClass.Attack(self),
-                          'Medicine': SkillClass.Medicine(self),
-                          'Poison': SkillClass.Poison(self)}
+        self.pos=pos
+        self.skill_set = {'Attack':SkillClass.Attack((0,0),0),
+                         'Shield':SkillClass.Shield((0,0),0),
+                         'Medicine':SkillClass.Medicine((0,0),0)}
         self.state = []         # 存状态token（如SHOCK，RAGE等）
         self.info = ''          # 放角色介绍之类的
 
-    '''def update(self, **kwargs):
-        self.state = kwargs['state']'''
+    def render(self,surface:pygame.Surface):
+        self.render_hp(self.pos,surface,max_width=400)
 
-
-# # test
-# h = Hero()
-# print(h.skill_set['Shield'].activate)
-# m = Monster()
-# print(m.skill_set['Medicine'].activate)
+    def activate(self):
+        if(self.HP>50):
+            return self.skill_set['Attack'].activate()
+        elif(self.HP>20):
+            rand=random.randint(1,2)
+            if(rand==1):
+                return self.skill_set['Medicine'].activate()
+            else:
+                return self.skill_set['Attack'].activate()
+        else :
+            rand=random.randint(1,4)
+            if(rand==1):
+                return self.skill_set['Shield'].activate()
+            else:
+                return self.skill_set['Medicine'].activate()

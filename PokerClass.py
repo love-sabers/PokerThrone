@@ -241,6 +241,19 @@ class PokerDeck:
             self.img_unrevealed.render(surface)
         for poker in self.revealed :
             poker.render(surface)
+        
+        # 显示牌数
+        # 设置字体和文字
+        COLOR_CH = (248, 195, 205)
+        font = pygame.font.Font(None, 40)
+        if(len(self.disPokered)!=0):
+            text = font.render(f'{len(self.disPokered)}', True, COLOR_CH)
+            text_rect = text.get_rect(center=(60,360))
+            surface.blit(text, text_rect)
+        if(len(self.unrevealed)!=0):    
+            text = font.render(f'{len(self.unrevealed)}', True, COLOR_CH)
+            text_rect = text.get_rect(center=(1020, 360))
+            surface.blit(text, text_rect)
 
     def check_click(self,event):
         for poker in self.revealed :
@@ -260,6 +273,8 @@ class PokerDeck:
         for poker in self.revealed:
             if poker.is_selected() :
                 selected_num+=1
+        if(selected_num==0):
+            return 0        
         if len(self.unrevealed) >= selected_num:
             # Move specified Pokers to disPokered pile
             new_pokers=[]
@@ -274,6 +289,7 @@ class PokerDeck:
             new_pokers+= [self.unrevealed.pop(0) for _ in range(selected_num)]
             self.revealed=new_pokers
             self.set_pos(self.pos)
+        return 1    
 
     def show_revealed(self):
         return self.revealed

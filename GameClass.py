@@ -11,41 +11,32 @@ class Game(object):
     def __init__(self,screen:pygame.Surface):
         self.screen=screen
         self.hero=Hero((540,360))
-        self.hero_fake=Hero((540,180))
-        self.empty_event = {             # For test
-            'MP_cost': 0,  # int
-            'HP_cost': 0,  # int
-            'MP_increase': 0,  # int
-            'HP_increase': 0,  # int
-            'pos_effect': [],  # list        # 正面效果是带给自己的正面效果
-            'neg_effect': [],  # list        # 负面效果是带给别人的负面效果
-            'damage': 0,  # int
-            'operate': []  # list            # 对游戏其他部分的操作请求，如换牌
-        }
+        self.monster=Monster((340,50))
         pass
     def game_init(self):
         pass
     def game_run(self):
-        game_event_set=[]
         running=1
         while(running):
             self.screen.fill((0,0,0))
             for event in pygame.event.get():
-                ret,game_event=self.hero.check_click(event)
+                ret,hero_event=self.hero.check_click(event)
                 # game_event_set.append(game_event)
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 if(ret==1):
-                    a = self.deal_event(self.hero, self.hero_fake, game_event)
-                    b = self.deal_event(self.hero_fake, self.hero, self.empty_event)
-                    running = min(a, b)
+                    monster_event=self.monster.activate()
+                    a = self.deal_event(self.hero, self.monster, hero_event)
+                    b = self.deal_event(self.monster, self.hero, monster_event)
+                    game_state=min(a,b)
+                    running = 0
 
-            self.hero_fake.render_hp(self.screen)
+            self.monster.render(self.screen)
             self.hero.render(self.screen)        
             pygame.display.update()
             pygame.time.Clock().tick(Config.FPS)
-            return running
+        return game_state
         
     def game_quit(self):
         pass
@@ -59,12 +50,14 @@ class Game(object):
         game_running=1
         while(game_running):
             game_running=self.game_run()
-            self.game_save()
+            self.game_save()    
         self.game_quit()
         pass
 
     @staticmethod
-    def deal_event(host: Hero, target: Hero, game_event: dict):
+    def deal_event(host: Creature, target: Creature, game_event: dict):
+        if(game_event=={}):
+            return 1
         """
         Deal the game event returned by skill.
         :param host:Hero or Monster:

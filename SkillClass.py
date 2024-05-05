@@ -35,7 +35,7 @@ class Skill(object):
 
 class Shield(Skill):        # 普通技能
     IMAGE_PATH='source/santiao.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['pos_effect'] = [GameEvent.IMMUNE]
 
@@ -46,7 +46,7 @@ class Shield(Skill):        # 普通技能
 
 class Medicine(Skill):          # 普通技能
     IMAGE_PATH='source/liangdui.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['HP_increase'] = 5
     
@@ -56,7 +56,7 @@ class Medicine(Skill):          # 普通技能
 
 class Getcard(Skill):         # 普通技能
     IMAGE_PATH='source/sitiao.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['operate'] = [GameEvent.GETCARD]
 
@@ -66,7 +66,7 @@ class Getcard(Skill):         # 普通技能
 
 class Attack(Skill):
     IMAGE_PATH='source/duizi.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['damage'] = 10
 
@@ -76,7 +76,7 @@ class Attack(Skill):
 
 class Rage(Skill):              # 较强技能
     IMAGE_PATH='source/tonghua.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['HP_cost'] = 5
         self.result['pos_effect'] = [GameEvent.RAGE]
@@ -87,7 +87,7 @@ class Rage(Skill):              # 较强技能
 
 class Shockwave(Skill):         # 较强技能
     IMAGE_PATH='source/shunzi.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['neg_effect'] = [GameEvent.SHOCK]
         self.result['damage'] = 10
@@ -98,7 +98,7 @@ class Shockwave(Skill):         # 较强技能
 
 class TrickBag(Skill):      # 较强技能
     IMAGE_PATH='source/hulu.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
     
     def activate(self):
@@ -126,7 +126,7 @@ class TrickBag(Skill):      # 较强技能
 
 class Poison(Skill):
     IMAGE_PATH='source/tonghuashun.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
 
     
@@ -143,7 +143,7 @@ class Poison(Skill):
 
 class Ultimate(Skill):       # 牛逼的大招
     IMAGE_PATH='source/huanjiatonghuashun.png'
-    def __init__(self, pos: tuple[int, int], handtype_check_code_list: list[int]):
+    def __init__(self, pos: tuple[int, int], handtype_check_code_list: int):
         super().__init__(pos, handtype_check_code_list)
         self.result['damage'] = 20
         self.result['neg_effect'] = [GameEvent.SHOCK]
